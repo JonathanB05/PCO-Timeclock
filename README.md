@@ -5,7 +5,7 @@ PCO Timeclock is a program that integrates with Planning Center Online API.
 This is a hobby project and is not affliated with Planning Center Online.
 
 ## Required
-*[PCO Admin access / API Tokens.](https://api.planningcenteronline.com)
+* [PCO Admin access / API Tokens.](https://api.planningcenteronline.com)
 
 ### Setup and Run
 * Clone this repository
