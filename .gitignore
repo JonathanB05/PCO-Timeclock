@@ -1,0 +1,7 @@
+
+*.log
+*.pyc
+auth.py
+PCO_Timeclock.egg-info/
+dist/
+build/
