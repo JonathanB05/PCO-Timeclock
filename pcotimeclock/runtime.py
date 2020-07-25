@@ -15,15 +15,16 @@ import keyboard
 def utc_to_local(utc_dt): #define the conversion from UTC to local time
     return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
 pco = pypco.PCO(auth.id, auth.secret) #authenticate using auth.py
-org=(pco.get('/services/v2'))#get info on the organization
+org=pco.get('/services/v2')#get info on the organization
 churchname=org['data']['attributes']['name']#define churchname
-
+user=pco.get('/people/v2/me')
+user_id=user['data']['id']
 while True:
     if keyboard.is_pressed('enter'):
         system('cls' if os.name == 'nt' else 'clear')
-        print('Have a good day, ' + pco.get('/services/v2/people/' + auth.person + '/')['data']['attributes']['first_name'])
+        print('Have a good day, ' + user['data']['attributes']['first_name'])
         exit() 
-    for type in pco.iterate('/services/v2/people/' + auth.person + '/recent_plans'): #run through the list of plans and get the id and name
+    for type in pco.iterate('/services/v2/people/' + user_id + '/recent_plans'): #run through the list of plans and get the id and name
         plan_id=(type['data']['id'])
         plan_name=(type['data']['attributes']['title'])
         try: #try to find plans that are live
@@ -31,10 +32,10 @@ while True:
             def printit(): #define function to run every second
                 
                 
-                islive = pco.get('/services/v2/people/' + auth.person + '/recent_plans/' + plan_id + '/live/current_item_time') #get current item time file
+                islive = pco.get('/services/v2/people/' + user_id + '/recent_plans/' + plan_id + '/live/current_item_time') #get current item time file
                 item_id=(islive['data']['relationships']['item']['data']['id']) #get the id of the current item
                 
-                for id in pco.iterate('/services/v2/people/' + auth.person + '/recent_plans/' + plan_id + '/items'): #run through the list of items in a plan
+                for id in pco.iterate('/services/v2/people/' + user_id + '/recent_plans/' + plan_id + '/items'): #run through the list of items in a plan
                     
                     if (id['data']['id'])== item_id: #check if the id of an item matches the id of the current live item
                         
