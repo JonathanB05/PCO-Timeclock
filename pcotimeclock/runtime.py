@@ -11,19 +11,24 @@ import os
 import logging
 import auth
 import keyboard
-
+pco = pypco.PCO(auth.id, auth.secret) #authenticate using auth.py
+org=pco.get('/services/v2')#get info on the organization
+churchname=org['data']['attributes']['name']#define churchname
+user=pco.get('/people/v2/me')
+user_id=user['data']['id']
 def utc_to_local(utc_dt): #define the conversion from UTC to local time
     return utc_dt.replace(tzinfo=timezone.utc).astimezone(tz=None)
 def printit(): #define function to run every second
-    islive = pco.get(f'/services/v2/people/{user_id}/recent_plans/{plan_id}/live/current_item_time') #get current item time file
+    islive=pco.get(f'/services/v2/people/{user_id}/recent_plans/{plan_id}/live/current_item_time') #get current item time file
+    
     item_id=(islive['data']['relationships']['item']['data']['id']) #get the id of the current item
     for id in pco.iterate(f'/services/v2/people/{user_id}/recent_plans/{plan_id}/items'): #run through the list of items in a plan
         if (id['data']['id'])== item_id: #check if the id of an item matches the id of the current live item
             livestart=dateutil.parser.isoparse((islive['data']['attributes']['live_start_at']))#get the start time of the current item
             starttime=utc_to_local(livestart)#convert livestart to the local time zone
-            length=(id['data']['attributes']['length'])*(0.01666666666666666666666666666667)#convert the time to minutes
-            newlength=datetime.timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=length, hours=0, weeks=0)#convert the time to the same format as the start time
-            endtime=(starttime+newlength)#calculate a predicted end time
+            
+            length=datetime.timedelta(days=0, seconds=0, microseconds=0, milliseconds=0, minutes=(id['data']['attributes']['length'])/60, hours=0, weeks=0)#convert the time to the same format as the start time
+            endtime=(starttime+length)#calculate a predicted end time
             item_title=(id['data']['attributes']['title'])#get the item title
             system('cls' if os.name == 'nt' else 'clear')#clear the command window
             print(f'{item_title} - {churchname}')#print the item title and our church name
@@ -32,17 +37,12 @@ def printit(): #define function to run every second
             runtime=(nowtime-starttime.replace(tzinfo=None))#calculate the run time
             #print("Run Time:",runtime)#print the run time
             #print('End Time:',endtime.strftime("%H:%M:%S"))  
-            if runtime > newlength: #check if the item is overtime
-                remtime=(runtime-newlength)#if overtime, set remtime to a negative time value
+            if runtime > length: #check if the item is overtime
+                remtime=(runtime-length)#if overtime, set remtime to a negative time value
                 print('-' + str(remtime)) #print remtime
             else: 
-                remtime=(newlength-runtime) #if time remaining in the current item, set remtime to the remaining time
+                remtime=(length-runtime) #if time remaining in the current item, set remtime to the remaining time
                 print(f'Remaining Time: {str(remtime)}')#print remtime
-pco = pypco.PCO(auth.id, auth.secret) #authenticate using auth.py
-org=pco.get('/services/v2')#get info on the organization
-churchname=org['data']['attributes']['name']#define churchname
-user=pco.get('/people/v2/me')
-user_id=user['data']['id']
 while True:
     if keyboard.is_pressed('enter'):
         system('cls' if os.name == 'nt' else 'clear')
